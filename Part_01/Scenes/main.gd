@@ -1,10 +1,10 @@
 extends Node
 
-var grid_width = 32
-var	 grid_height = 32
+var grid_width = 16
+var	 grid_height = 16
 
-var screen_width = 20
-var	 screen_height = 12
+var screen_width = 50
+var	 screen_height = 32
 # class member variables go here, for example:
 # var a = 2
 # var b = "textvar"
