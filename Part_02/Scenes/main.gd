@@ -1,7 +1,6 @@
 extends Node
 
-var grid_size = Vector2( 16, 16 )
-var map_size = Vector2( 50, 32 )
+
 var entities = []
 
 # class member variables go here, for example:
@@ -20,11 +19,11 @@ func _ready():
 	
 	var player = entityScene.instance()
 	player.name = "player"
-	player.Init( map_size / 2, "主", Color( 1, 1, 1, 1 ) )
+	player.Init( Game.map_size / 2, "主", Color( 1, 1, 1, 1 ) )
 	add_child( player )
 	
 	var npc = entityScene.instance()
-	npc.Init( ( map_size / 2 + Vector2( -5, 0 ) ), "兵", Color( 1, 1, 0, 1 ) )
+	npc.Init( ( Game.map_size / 2 + Vector2( -5, 0 ) ), "兵", Color( 1, 1, 0, 1 ) )
 	add_child( npc )
 	
 	entities= [ player, npc ]

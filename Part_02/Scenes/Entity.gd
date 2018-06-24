@@ -10,7 +10,7 @@ func _ready():
 	pass
 	
 func _updatePosition():
-	rect_position = position * Vector2( 16, 16 )
+	rect_position = position * Game.grid_size
 	
 func _updateDisplayProperties():
 	text = displayChar

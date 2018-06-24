@@ -11,7 +11,7 @@ var tiles = []
 func _ready():
 	# Called when the node is added to the scene for the first time.
 	# Initialization here
-	Init( 50, 32 )
+	Init( Game.map_size )
 	InitializeTiles()
 	
 func _updateDisplayProperties():
@@ -23,9 +23,9 @@ func _updateDisplayProperties():
 			else:	
 				tiles[x][y].color = Color( 0.2, 0.2, 0.75, 1 )
 				
-func Init( _width, _height ):
-	width = _width
-	height = _height
+func Init( mapSize ):
+	width = mapSize.x
+	height = mapSize.y
 	
 func InitializeTiles():
 	tiles = []
@@ -34,7 +34,7 @@ func InitializeTiles():
 		for y in range( height ):
 			tiles[x].append( [] )		
 			var tile = Tile.instance()
-			tile.rect_position = Vector2( Vector2( x, y ) * Vector2( 16, 16 ) )
+			tile.rect_position = Vector2( Vector2( x, y ) * Game.grid_size )
 			tiles[x][y] = tile
 			add_child( tile )
 			

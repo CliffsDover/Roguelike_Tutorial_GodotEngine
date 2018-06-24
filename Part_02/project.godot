@@ -14,6 +14,10 @@ config/name="Roguelike_Tutorial_GodotEngine_Part_02"
 run/main_scene="res://Scenes/main.tscn"
 config/icon="res://icon.png"
 
+[autoload]
+
+Game="*res://Scenes/Game.gd"
+
 [display]
 
 window/size/width=800
