@@ -7,6 +7,7 @@ onready var Rect = preload( "res://Scenes/Rect.tscn" )
 var width
 var height
 var tiles = []
+var rooms = []
 # class member variables go here, for example:
 # var a = 2
 # var b = "textvar"
@@ -88,7 +89,7 @@ func Make_Map():
 	var room_max_size = 10
 	var room_min_size = 6
 	var max_rooms = 30
-	var rooms = []
+	
 	var num_rooms = 0
 	#print( range(max_rooms) )
 	for r in range( max_rooms ):

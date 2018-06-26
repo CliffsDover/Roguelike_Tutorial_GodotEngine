@@ -20,12 +20,12 @@ func _ready():
 	
 	var player = entityScene.instance()
 	player.name = "player"
-	player.Init( Game.map_size / 2, "主", Color( 1, 1, 1, 1 ) )
+	player.Init( game_map.rooms[0].Center(), "主", Color( 1, 1, 1, 1 ) )
 	#player.Init( Vector2( 3, 3 ), "主", Color( 1, 1, 1, 1 ) )
 	add_child( player )
 	
 	var npc = entityScene.instance()
-	npc.Init( ( Game.map_size / 2 + Vector2( -5, 0 ) ), "兵", Color( 1, 1, 0, 1 ) )
+	npc.Init( game_map.rooms[ game_map.rooms.size() - 1 ].Center(), "兵", Color( 1, 1, 0, 1 ) )
 	add_child( npc )
 	
 	entities= [ player, npc ]
