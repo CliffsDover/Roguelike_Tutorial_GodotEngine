@@ -45,6 +45,7 @@ func InitializeTiles():
 			add_child( tile )
 			
 	Make_Map()
+	Make_Tunnels()
 		
 	_updateDisplayProperties()
 	#for x in range( width ):
@@ -118,3 +119,15 @@ func Make_Map():
 				num_rooms = num_rooms + 1
 			
 	print( "Total rooms:" + str( rooms.size() ) )
+	
+func Make_Tunnels():
+	for i in range( 1, rooms.size() ):
+		var prevRoomCenter = rooms[ i - 1 ].Center()
+		var currRoomCenter = rooms[ i ].Center()
+		
+		if 1 == ( randi() % 2 ):
+			Create_H_Tunnel( prevRoomCenter.x, currRoomCenter.x, prevRoomCenter.y )
+			Create_V_Tunnel( prevRoomCenter.y, currRoomCenter.y, currRoomCenter.x )
+		else:
+			Create_V_Tunnel( prevRoomCenter.y, currRoomCenter.y, prevRoomCenter.x )
+			Create_H_Tunnel( prevRoomCenter.x, currRoomCenter.x, currRoomCenter.y )
