@@ -1,13 +1,15 @@
-extends Node
+extends Node2D
 
 
 onready var Tile = preload( "res://Scenes/Tile.tscn" )
 onready var Rect = preload( "res://Scenes/Rect.tscn" )
+onready var CollisionTile = preload( "res://Scenes/CollisionTile.tscn" )
 
 var width
 var height
 var tiles = []
 var rooms = []
+var collidedPos = Vector2( 0,0 )
 # class member variables go here, for example:
 # var a = 2
 # var b = "textvar"
@@ -22,10 +24,16 @@ func _updateDisplayProperties():
 	for x in range( width ):
 		for y in range( height ):
 			var wall = tiles[x][y].block_sight		
-			if wall:
-				tiles[x][y].color = Color( 0, 0, 0.5, 1 )
+			if tiles[x][y].isInFOV:
+				if wall:
+					tiles[x][y].color = Color( 0.5, 0, 0.0, 1 )
+				else:	
+					tiles[x][y].color = Color( 0.0, 0.5, 0.0, 1 )
 			else:	
-				tiles[x][y].color = Color( 0.2, 0.2, 0.75, 1 )
+				if wall:
+					tiles[x][y].color = Color( 0, 0, 0.5, 1 )
+				else:	
+					tiles[x][y].color = Color( 0.2, 0.2, 0.75, 1 )
 				
 func Init( mapSize ):
 	width = mapSize.x
@@ -42,7 +50,7 @@ func InitializeTiles():
 			tile.block_sight = true
 			tile.rect_position = Vector2( Vector2( x, y ) * Game.grid_size )
 			tiles[x][y] = tile
-			add_child( tile )
+			$DisplayingTiles.add_child( tile )
 			
 	Make_Map()
 	Make_Tunnels()
@@ -131,3 +139,50 @@ func Make_Tunnels():
 		else:
 			Create_V_Tunnel( prevRoomCenter.y, currRoomCenter.y, prevRoomCenter.x )
 			Create_H_Tunnel( prevRoomCenter.x, currRoomCenter.x, currRoomCenter.y )
+
+func Calculate_FOV( playerPos, radius ):
+	print( "[GameMap:Calculate_FOV]" )
+
+	
+	for n in $CollisionTiles.get_children():
+		$CollisionTiles.remove_child( n )
+		n.queue_free()
+		
+	for x in range( Game.map_size.x ):
+		for y in range( Game.map_size.y ):
+			tiles[x][y].isInFOV = false
+		
+	var ray = RayCast2D.new()
+	ray.enabled = true
+	ray.position = playerPos * Game.grid_size + Game.grid_size / 2
+	$CollisionTiles.add_child( ray )
+	#print( ray.position )
+	
+	
+	for x in range( -radius, radius + 1 ):
+		for y in range( -radius, radius + 1 ):
+			var checkingTilePos = Vector2( playerPos.x + x, playerPos.y + y )
+			if ( checkingTilePos.x ) >= 0 and ( checkingTilePos.x ) < Game.map_size.x and ( checkingTilePos.y) >= 0 and ( checkingTilePos.y ) < Game.map_size.y:
+				if tiles[ checkingTilePos.x ][ checkingTilePos.y ].block_sight:
+					var collisionTile = CollisionTile.instance()
+					collisionTile.position = tiles[ checkingTilePos.x ][ checkingTilePos.y ].rect_position + Game.grid_size / 2
+					$CollisionTiles.add_child( collisionTile )
+					
+					
+					
+	for x in range( -radius, radius + 1 ):
+		for y in range( -radius, radius + 1 ):
+			var checkingTilePos = Vector2( playerPos.x + x, playerPos.y + y )
+			if ( checkingTilePos.x ) >= 0 and ( checkingTilePos.x ) < Game.map_size.x and ( checkingTilePos.y) >= 0 and ( checkingTilePos.y ) < Game.map_size.y:					
+				ray.cast_to = tiles[checkingTilePos.x][checkingTilePos.y].rect_position + Game.grid_size / 2 - ray.position
+				#print( ray.cast_to )
+				ray.force_raycast_update()
+				if not ray.is_colliding():
+					tiles[checkingTilePos.x][checkingTilePos.y].isInFOV = true
+					
+				#print( checkingTilePos )
+				#print( tiles[checkingTilePos.x][checkingTilePos.y].isInFOV  )
+				
+	_updateDisplayProperties()	
+
+	

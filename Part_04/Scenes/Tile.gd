@@ -3,6 +3,7 @@ extends ColorRect
 
 var blocked = false
 var block_sight = false
+var isInFOV = false
 
 func _ready():
 	# Called when the node is added to the scene for the first time.

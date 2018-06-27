@@ -8,13 +8,14 @@ var entities = []
 # var b = "textvar"
 onready var entityScene = preload( "res://Scenes/Entity.tscn" )
 onready var gameMapScene = preload( "res://Scenes/GameMap.tscn" )
+var game_map
 
 func _ready():
 	randomize()
 	#$Player.rect_position = Vector2( screen_width / 2 * grid_width, screen_height / 2 * grid_height )
 	set_process_input( true )
 	
-	var game_map = gameMapScene.instance()
+	game_map = gameMapScene.instance()
 	game_map.name = "game_map"
 	add_child( game_map )
 	
@@ -49,6 +50,7 @@ func _input(event):
 				delta = Vector2( 0, 1 )
 			if not $game_map.Is_Blocked( $player.position + delta ):
 				$player.Move( delta )
+				game_map.Calculate_FOV( $player.position, 5 )
 	elif event is InputEventMouseMotion:
 		#print("Mouse Motion at: ", event.position / Game.grid_size )			
 		$HUD/MousePosLabel.text = "(" + str( int( event.position.x / Game.grid_size.x ) ) + "," + str( int( event.position.y / Game.grid_size.y ) ) + ")"

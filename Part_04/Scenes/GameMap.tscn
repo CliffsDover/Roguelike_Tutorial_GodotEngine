@@ -2,8 +2,12 @@
 
 [ext_resource path="res://Scenes/GameMap.gd" type="Script" id=1]
 
-[node name="GameMap" type="Node" index="0"]
+[node name="GameMap" type="Node2D" index="0"]
 
 script = ExtResource( 1 )
+
+[node name="DisplayingTiles" type="Node" parent="." index="0"]
+
+[node name="CollisionTiles" type="Node" parent="." index="1"]
 
 
