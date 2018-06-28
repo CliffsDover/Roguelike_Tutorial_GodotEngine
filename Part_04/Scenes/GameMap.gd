@@ -218,6 +218,8 @@ func _CalculateTargetInFOV( sourcePos, targetPos ):
 	ray.position = sourcePos * Game.grid_size + Game.grid_size / 2
 	$CollisionTiles.add_child( ray )
 	
+	var centerVisible = not _IsRayCollided( ray, tiles[targetPos.x][targetPos.y].rect_position + Game.grid_size / 2 )
+	print( centerVisible )
 	var topLeftVisible = not _IsRayCollided( ray, tiles[targetPos.x][targetPos.y].rect_position + Vector2( 1, 1 ) )
 	print( topLeftVisible )
 	var topRightVisible = not _IsRayCollided( ray, tiles[targetPos.x][targetPos.y].rect_position + Vector2( Game.grid_size.x - 1, 1 ))
@@ -227,7 +229,7 @@ func _CalculateTargetInFOV( sourcePos, targetPos ):
 	var bottomRightVisible = not _IsRayCollided( ray, tiles[targetPos.x][targetPos.y].rect_position + Vector2( Game.grid_size.x - 1, Game.grid_size.y - 1 ) )				
 	print( bottomRightVisible )	
 	
-	tiles[targetPos.x][targetPos.y].isInFOV = topLeftVisible or topRightVisible or bottomLeftVisible or bottomRightVisible
+	tiles[targetPos.x][targetPos.y].isInFOV = centerVisible or topLeftVisible or topRightVisible or bottomLeftVisible or bottomRightVisible
 	print( tiles[targetPos.x][targetPos.y].isInFOV )	
 	
 	$CollisionTiles.remove_child( ray )
