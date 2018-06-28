@@ -118,9 +118,9 @@ func Make_Map():
 	
 	#Create_H_Tunnel( 21, 22, 20 )
 	
-	var room_max_size = 10
+	var room_max_size = 20
 	var room_min_size = 6
-	var max_rooms = 30
+	var max_rooms = 10
 	
 	var num_rooms = 0
 	#print( range(max_rooms) )
@@ -182,6 +182,9 @@ func Calculate_FOV( playerPos, radius ):
 	for x in range( -radius, radius + 1 ):
 		for y in range( -radius, radius + 1 ):
 			var checkingTilePos = Vector2( playerPos.x + x, playerPos.y + y )
+			print( ( checkingTilePos - playerPos ).length() )
+			if ( checkingTilePos - playerPos ).length() > radius * 0.9:
+				continue
 			if ( checkingTilePos.x ) >= 0 and ( checkingTilePos.x ) < Game.map_size.x and ( checkingTilePos.y) >= 0 and ( checkingTilePos.y ) < Game.map_size.y:
 				if tiles[ checkingTilePos.x ][ checkingTilePos.y ].block_sight:
 					var collisionTile = CollisionTile.instance()
@@ -193,6 +196,8 @@ func Calculate_FOV( playerPos, radius ):
 	for x in range( -radius, radius + 1 ):
 		for y in range( -radius, radius + 1 ):
 			var checkingTilePos = Vector2( playerPos.x + x, playerPos.y + y )
+			if ( checkingTilePos - playerPos ).length() > radius * 0.9:
+				continue
 			if ( checkingTilePos.x ) >= 0 and ( checkingTilePos.x ) < Game.map_size.x and ( checkingTilePos.y) >= 0 and ( checkingTilePos.y ) < Game.map_size.y:
 				_CalculateTargetInFOV( playerPos, checkingTilePos )
 				
