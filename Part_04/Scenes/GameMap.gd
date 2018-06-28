@@ -13,12 +13,35 @@ var collidedPos = Vector2( 0,0 )
 # class member variables go here, for example:
 # var a = 2
 # var b = "textvar"
+var lines = []
 
 func _ready():
 	# Called when the node is added to the scene for the first time.
 	# Initialization here
 	Init( Game.map_size )
 	InitializeTiles()
+	set_process( true )
+	
+	set_process_input( true )
+	
+func _process(delta):
+	pass
+	#update()
+	
+func _draw():
+	for l in lines:
+		draw_line( l[0], l[1], Color( 1, 0, 0, 1 ), 1 )
+	
+func _input(event):
+	pass
+	#if event is InputEventMouseButton:
+	#	if event.button_index == BUTTON_LEFT and event.pressed:
+	#		print("pressed")
+	#		var pressedPos = Vector2( int( event.position.x / Game.grid_size.x ), int( event.position.y / Game.grid_size.y ) )
+	#		print( pressedPos )
+	#		draw_line( playerPos * Game.grid_size, pressedPos * Game.grid_size )
+	#		_update()
+
 	
 func _updateDisplayProperties():
 	for x in range( width ):
@@ -26,14 +49,14 @@ func _updateDisplayProperties():
 			var wall = tiles[x][y].block_sight		
 			if tiles[x][y].isInFOV:
 				if wall:
-					tiles[x][y].color = Color( 0.5, 0, 0.0, 1 )
+					tiles[x][y].color = Color( 0.5, 0, 0.0, 0.5 )
 				else:	
-					tiles[x][y].color = Color( 0.0, 0.5, 0.0, 1 )
+					tiles[x][y].color = Color( 0.0, 0.5, 0.0, 0.5 )
 			else:	
 				if wall:
-					tiles[x][y].color = Color( 0, 0, 0.5, 1 )
+					tiles[x][y].color = Color( 0, 0, 0.5, 0.5 )
 				else:	
-					tiles[x][y].color = Color( 0.2, 0.2, 0.75, 1 )
+					tiles[x][y].color = Color( 0.2, 0.2, 0.75, 0.5 )
 				
 func Init( mapSize ):
 	width = mapSize.x
@@ -152,10 +175,7 @@ func Calculate_FOV( playerPos, radius ):
 		for y in range( Game.map_size.y ):
 			tiles[x][y].isInFOV = false
 		
-	var ray = RayCast2D.new()
-	ray.enabled = true
-	ray.position = playerPos * Game.grid_size + Game.grid_size / 2
-	$CollisionTiles.add_child( ray )
+
 	#print( ray.position )
 	
 	
@@ -173,16 +193,35 @@ func Calculate_FOV( playerPos, radius ):
 	for x in range( -radius, radius + 1 ):
 		for y in range( -radius, radius + 1 ):
 			var checkingTilePos = Vector2( playerPos.x + x, playerPos.y + y )
-			if ( checkingTilePos.x ) >= 0 and ( checkingTilePos.x ) < Game.map_size.x and ( checkingTilePos.y) >= 0 and ( checkingTilePos.y ) < Game.map_size.y:					
-				ray.cast_to = tiles[checkingTilePos.x][checkingTilePos.y].rect_position + Game.grid_size / 2 - ray.position
-				#print( ray.cast_to )
-				ray.force_raycast_update()
-				if not ray.is_colliding():
-					tiles[checkingTilePos.x][checkingTilePos.y].isInFOV = true
-					
-				#print( checkingTilePos )
-				#print( tiles[checkingTilePos.x][checkingTilePos.y].isInFOV  )
+			if ( checkingTilePos.x ) >= 0 and ( checkingTilePos.x ) < Game.map_size.x and ( checkingTilePos.y) >= 0 and ( checkingTilePos.y ) < Game.map_size.y:
+				_CalculateTargetInFOV( playerPos, checkingTilePos )
 				
 	_updateDisplayProperties()	
 
+func _IsRayCollided( ray, target ):	
+	ray.cast_to = target - ray.position
+	#print( ray.cast_to )
+	ray.force_raycast_update()
+	return ray.is_colliding()
+		
+func _CalculateTargetInFOV( sourcePos, targetPos ):
 	
+	var ray = RayCast2D.new()
+	ray.enabled = true
+	ray.position = sourcePos * Game.grid_size + Game.grid_size / 2
+	$CollisionTiles.add_child( ray )
+	
+	var topLeftVisible = not _IsRayCollided( ray, tiles[targetPos.x][targetPos.y].rect_position + Vector2( 1, 1 ) )
+	print( topLeftVisible )
+	var topRightVisible = not _IsRayCollided( ray, tiles[targetPos.x][targetPos.y].rect_position + Vector2( Game.grid_size.x - 1, 1 ))
+	print( topRightVisible )
+	var bottomLeftVisible = not _IsRayCollided( ray, tiles[targetPos.x][targetPos.y].rect_position + Vector2( 1, Game.grid_size.y - 1 ) )				
+	print( bottomLeftVisible )
+	var bottomRightVisible = not _IsRayCollided( ray, tiles[targetPos.x][targetPos.y].rect_position + Vector2( Game.grid_size.x - 1, Game.grid_size.y - 1 ) )				
+	print( bottomRightVisible )	
+	
+	tiles[targetPos.x][targetPos.y].isInFOV = topLeftVisible or topRightVisible or bottomLeftVisible or bottomRightVisible
+	print( tiles[targetPos.x][targetPos.y].isInFOV )	
+	
+	$CollisionTiles.remove_child( ray )
+	ray.queue_free()

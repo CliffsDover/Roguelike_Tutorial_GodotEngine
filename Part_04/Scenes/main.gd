@@ -54,6 +54,18 @@ func _input(event):
 	elif event is InputEventMouseMotion:
 		#print("Mouse Motion at: ", event.position / Game.grid_size )			
 		$HUD/MousePosLabel.text = "(" + str( int( event.position.x / Game.grid_size.x ) ) + "," + str( int( event.position.y / Game.grid_size.y ) ) + ")"
+	elif event is InputEventMouseButton:
+		if event.button_index == BUTTON_LEFT and event.pressed:
+			print("pressed")
+			var pressedPos = Vector2( int( event.position.x / Game.grid_size.x ), int( event.position.y / Game.grid_size.y ) )
+			print( pressedPos )
+			game_map.lines.clear()
+			game_map.lines.append( [ $player.position * Game.grid_size + Game.grid_size / 2, pressedPos * Game.grid_size ] )
+			game_map.lines.append( [ $player.position * Game.grid_size + Game.grid_size / 2, pressedPos * Game.grid_size + Vector2( 1 , 0 ) * Game.grid_size ] )
+			game_map.lines.append( [ $player.position * Game.grid_size + Game.grid_size / 2, pressedPos * Game.grid_size + Vector2( 0 , 1 ) * Game.grid_size ] )
+			game_map.lines.append( [ $player.position * Game.grid_size + Game.grid_size / 2, pressedPos * Game.grid_size + Vector2( 1 , 1 ) * Game.grid_size ] )
+			game_map._CalculateTargetInFOV( $player.position, pressedPos )
+			game_map.update()
 
 func _on_FPSTimer_timeout():
 	$HUD/FPSLabel.text = "FPS:" + str( int( Engine.get_frames_per_second() ) )
