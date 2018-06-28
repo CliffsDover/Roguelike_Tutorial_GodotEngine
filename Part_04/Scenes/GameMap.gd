@@ -118,9 +118,9 @@ func Make_Map():
 	
 	#Create_H_Tunnel( 21, 22, 20 )
 	
-	var room_max_size = 20
+	var room_max_size = 15
 	var room_min_size = 6
-	var max_rooms = 10
+	var max_rooms = 30
 	
 	var num_rooms = 0
 	#print( range(max_rooms) )
@@ -167,9 +167,7 @@ func Calculate_FOV( playerPos, radius ):
 	print( "[GameMap:Calculate_FOV]" )
 
 	
-	for n in $CollisionTiles.get_children():
-		$CollisionTiles.remove_child( n )
-		n.queue_free()
+	
 		
 	for x in range( Game.map_size.x ):
 		for y in range( Game.map_size.y ):
@@ -202,6 +200,10 @@ func Calculate_FOV( playerPos, radius ):
 				_CalculateTargetInFOV( playerPos, checkingTilePos )
 				
 	_updateDisplayProperties()	
+	
+	for n in $CollisionTiles.get_children():
+		$CollisionTiles.remove_child( n )
+		n.queue_free()	
 
 func _IsRayCollided( ray, target ):	
 	ray.cast_to = target - ray.position
