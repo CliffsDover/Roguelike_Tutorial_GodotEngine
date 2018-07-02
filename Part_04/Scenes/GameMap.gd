@@ -28,9 +28,9 @@ func _process(delta):
 	pass
 	#update()
 	
-func _draw():
-	for l in lines:
-		draw_line( l[0], l[1], Color( 1, 0, 0, 1 ), 1 )
+#func _draw():
+#	for l in lines:
+#		draw_line( l[0], l[1], Color( 1, 0, 0, 1 ), 1, true )
 	
 func _input(event):
 	pass
@@ -46,17 +46,20 @@ func _input(event):
 func _updateDisplayProperties():
 	for x in range( width ):
 		for y in range( height ):
-			var wall = tiles[x][y].block_sight		
+			#	var wall = tiles[x][y].block_sight		
 			if tiles[x][y].isInFOV:
-				if wall:
-					tiles[x][y].color = Color( 0.5, 0, 0.0, 0.5 )
+				if tiles[x][y].isWall:
+					tiles[x][y].get_node("ColorRect").color = Game.light_wall
+				elif tiles[x][y].block_sight:
+					tiles[x][y].get_node("ColorRect").color = Game.light_wall
 				else:	
-					tiles[x][y].color = Color( 0.0, 0.5, 0.0, 0.5 )
-			else:	
-				if wall:
-					tiles[x][y].color = Color( 0, 0, 0.5, 0.5 )
+					tiles[x][y].get_node("ColorRect").color = Game.light_ground
+				tiles[x][y].explored = true
+			elif tiles[x][y].explored:	
+				if tiles[x][y].block_sight:
+					tiles[x][y].get_node("ColorRect").color = Game.dark_wall
 				else:	
-					tiles[x][y].color = Color( 0.2, 0.2, 0.75, 0.5 )
+					tiles[x][y].get_node("ColorRect").color = Game.dark_ground
 				
 func Init( mapSize ):
 	width = mapSize.x
@@ -71,13 +74,13 @@ func InitializeTiles():
 			var tile = Tile.instance()
 			tile.blocked = true
 			tile.block_sight = true
-			tile.rect_position = Vector2( Vector2( x, y ) * Game.grid_size )
+			tile.position = Vector2( Vector2( x, y ) * Game.grid_size )
 			tiles[x][y] = tile
 			$DisplayingTiles.add_child( tile )
 			
 	Make_Map()
 	Make_Tunnels()
-		
+	_CheckWalls()
 	_updateDisplayProperties()
 	#for x in range( width ):
 	#	for y in range( height ):
@@ -149,6 +152,7 @@ func Make_Map():
 				rooms.append( new_room )
 				num_rooms = num_rooms + 1
 			
+		
 	print( "Total rooms:" + str( rooms.size() ) )
 	
 func Make_Tunnels():
@@ -164,10 +168,10 @@ func Make_Tunnels():
 			Create_H_Tunnel( prevRoomCenter.x, currRoomCenter.x, currRoomCenter.y )
 
 func Calculate_FOV( playerPos, radius ):
-	print( "[GameMap:Calculate_FOV]" )
+	#print( "[GameMap:Calculate_FOV]" )
 
-	
-	
+		
+
 		
 	for x in range( Game.map_size.x ):
 		for y in range( Game.map_size.y ):
@@ -180,13 +184,16 @@ func Calculate_FOV( playerPos, radius ):
 	for x in range( -radius, radius + 1 ):
 		for y in range( -radius, radius + 1 ):
 			var checkingTilePos = Vector2( playerPos.x + x, playerPos.y + y )
-			print( ( checkingTilePos - playerPos ).length() )
+			#print( checkingTilePos )
+			#print( ( checkingTilePos - playerPos ).length() )
 			if ( checkingTilePos - playerPos ).length() > radius * 0.9:
 				continue
 			if ( checkingTilePos.x ) >= 0 and ( checkingTilePos.x ) < Game.map_size.x and ( checkingTilePos.y) >= 0 and ( checkingTilePos.y ) < Game.map_size.y:
 				if tiles[ checkingTilePos.x ][ checkingTilePos.y ].block_sight:
 					var collisionTile = CollisionTile.instance()
-					collisionTile.position = tiles[ checkingTilePos.x ][ checkingTilePos.y ].rect_position + Game.grid_size / 2
+					collisionTile.get_node( "Area2D" ).set_meta( "id", checkingTilePos.y * Game.map_size.x + checkingTilePos.x )
+					collisionTile.position = tiles[ checkingTilePos.x ][ checkingTilePos.y ].position + Game.grid_size / 2
+					#print( collisionTile.position )
 					$CollisionTiles.add_child( collisionTile )
 					
 					
@@ -203,34 +210,94 @@ func Calculate_FOV( playerPos, radius ):
 	
 	for n in $CollisionTiles.get_children():
 		$CollisionTiles.remove_child( n )
-		n.queue_free()	
+		n.queue_free()		
+
 
 func _IsRayCollided( ray, target ):	
 	ray.cast_to = target - ray.position
+	#print( target )
+	#print( ray.position )
 	#print( ray.cast_to )
 	ray.force_raycast_update()
+
 	return ray.is_colliding()
 		
 func _CalculateTargetInFOV( sourcePos, targetPos ):
 	
 	var ray = RayCast2D.new()
 	ray.enabled = true
-	ray.position = sourcePos * Game.grid_size + Game.grid_size / 2
 	$CollisionTiles.add_child( ray )
 	
-	var centerVisible = not _IsRayCollided( ray, tiles[targetPos.x][targetPos.y].rect_position + Game.grid_size / 2 )
-	print( centerVisible )
-	var topLeftVisible = not _IsRayCollided( ray, tiles[targetPos.x][targetPos.y].rect_position + Vector2( 1, 1 ) )
-	print( topLeftVisible )
-	var topRightVisible = not _IsRayCollided( ray, tiles[targetPos.x][targetPos.y].rect_position + Vector2( Game.grid_size.x - 1, 1 ))
-	print( topRightVisible )
-	var bottomLeftVisible = not _IsRayCollided( ray, tiles[targetPos.x][targetPos.y].rect_position + Vector2( 1, Game.grid_size.y - 1 ) )				
-	print( bottomLeftVisible )
-	var bottomRightVisible = not _IsRayCollided( ray, tiles[targetPos.x][targetPos.y].rect_position + Vector2( Game.grid_size.x - 1, Game.grid_size.y - 1 ) )				
-	print( bottomRightVisible )	
+	#print( targetPos )
+	#print( targetPos.y * Game.map_size.x + targetPos.x )
 	
-	tiles[targetPos.x][targetPos.y].isInFOV = centerVisible or topLeftVisible or topRightVisible or bottomLeftVisible or bottomRightVisible
-	print( tiles[targetPos.x][targetPos.y].isInFOV )	
+	for rayPos in [ sourcePos * Game.grid_size + Game.grid_size / 2]:#, sourcePos * Game.grid_size, sourcePos * Game.grid_size + Vector2( Game.grid_size.x, 0 ), sourcePos * Game.grid_size + Vector2( 0, Game.grid_size.y ), sourcePos * Game.grid_size + Vector2( Game.grid_size.x, Game.grid_size.y ) ]: 
+		ray.position = rayPos
+		var centerVisible = not _IsRayCollided( ray, tiles[targetPos.x][targetPos.y].position + Game.grid_size / 2 )
+		#print( centerVisible )
+		if not centerVisible:
+			#print( ray.get_collider().position )
+			#print( "cid" + str( ray.get_collider().get_meta( "id" ) ) )
+			if ray.get_collider().get_meta( "id" ) == ( targetPos.y * Game.map_size.x + targetPos.x ):
+				centerVisible = true
+			
+		var topLeftVisible = not _IsRayCollided( ray, tiles[targetPos.x][targetPos.y].position + Vector2( 1, 1 ) )
+		#print( topLeftVisible )
+		if not topLeftVisible:
+			#print( targetPos.y * Game.map_size.x + targetPos.x )
+			#print( "cid" + str( ray.get_collider().get_meta( "id" ) ) )
+			if ray.get_collider().get_meta( "id" ) == ( targetPos.y * Game.map_size.x + targetPos.x ):
+				topLeftVisible = true
+		
+		var topRightVisible = not _IsRayCollided( ray, tiles[targetPos.x][targetPos.y].position + Vector2( Game.grid_size.x - 1, 1 ))
+		#print( topRightVisible )
+		if not topRightVisible:
+			#print( targetPos.y * Game.map_size.x + targetPos.x )
+			#print( ray.get_collider().get_meta( "id" ) )
+			if ray.get_collider().get_meta( "id" ) == ( targetPos.y * Game.map_size.x + targetPos.x ):
+				topRightVisible = true
+		
+		var bottomLeftVisible = not _IsRayCollided( ray, tiles[targetPos.x][targetPos.y].position + Vector2( 1, Game.grid_size.y - 1 ) )				
+		#print( bottomLeftVisible )
+		if not bottomLeftVisible:
+			#print( targetPos.y * Game.map_size.x + targetPos.x )
+			#print( ray.get_collider().get_meta( "id" ) )
+			if ray.get_collider().get_meta( "id" ) == ( targetPos.y * Game.map_size.x + targetPos.x ):
+				bottomLeftVisible = true
+		
+		var bottomRightVisible = not _IsRayCollided( ray, tiles[targetPos.x][targetPos.y].position + Vector2( Game.grid_size.x - 1, Game.grid_size.y - 1 ) )				
+		#print( bottomRightVisible )	
+		if not bottomRightVisible:
+			#print( targetPos.y * Game.map_size.x + targetPos.x )
+			#print( ray.get_collider().get_meta( "id" ) )
+			if ray.get_collider().get_meta( "id" ) == ( targetPos.y * Game.map_size.x + targetPos.x ):
+				bottomRightVisible = true
+		
+		
+		tiles[targetPos.x][targetPos.y].isInFOV = centerVisible or topLeftVisible or topRightVisible or bottomLeftVisible or bottomRightVisible
+			
 	
 	$CollisionTiles.remove_child( ray )
 	ray.queue_free()
+	
+func _CheckWalls():
+	for x in range( width ):
+		for y in range( height ):				
+			tiles[x][y].isWall = _checkWall( Vector2(x,y) )	
+			#if tiles[x][y].isWall:
+			#	print( str( x ) + "," + str( y ) + " is wall" )
+				
+func _checkWall( pos ):
+	var isWall = false
+			
+	for dx in range( -1, 2 ):
+		for dy in range( -1, 2):
+			if dx == 0 and dy == 0:
+				continue
+			var checkingTilePos = Vector2( pos.x + dx, pos.y + dy )
+			if checkingTilePos.x >= 0 and checkingTilePos.x < width and checkingTilePos.y >= 0 and checkingTilePos.y < height:
+				if not tiles[ checkingTilePos.x ][ checkingTilePos.y ].block_sight:
+					isWall = isWall or true
+					
+
+	return ( tiles[pos.x][pos.y].block_sight and isWall )	

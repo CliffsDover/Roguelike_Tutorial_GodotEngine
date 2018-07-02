@@ -11,7 +11,7 @@ onready var gameMapScene = preload( "res://Scenes/GameMap.tscn" )
 var game_map
 
 func _ready():
-	randomize()
+	#randomize()
 	#$Player.rect_position = Vector2( screen_width / 2 * grid_width, screen_height / 2 * grid_height )
 	set_process_input( true )
 	
@@ -60,12 +60,15 @@ func _input(event):
 			var pressedPos = Vector2( int( event.position.x / Game.grid_size.x ), int( event.position.y / Game.grid_size.y ) )
 			print( pressedPos )
 			game_map.lines.clear()
-			game_map.lines.append( [ $player.position * Game.grid_size + Game.grid_size / 2, pressedPos * Game.grid_size ] )
-			game_map.lines.append( [ $player.position * Game.grid_size + Game.grid_size / 2, pressedPos * Game.grid_size + Vector2( 1 , 0 ) * Game.grid_size ] )
-			game_map.lines.append( [ $player.position * Game.grid_size + Game.grid_size / 2, pressedPos * Game.grid_size + Vector2( 0 , 1 ) * Game.grid_size ] )
-			game_map.lines.append( [ $player.position * Game.grid_size + Game.grid_size / 2, pressedPos * Game.grid_size + Vector2( 1 , 1 ) * Game.grid_size ] )
+			#game_map.lines.append( [ $player.position * Game.grid_size + Game.grid_size / 2, pressedPos * Game.grid_size ] )
+			#game_map.lines.append( [ $player.position * Game.grid_size + Game.grid_size / 2, pressedPos * Game.grid_size + Vector2( 1 , 0 ) * Game.grid_size ] )
+			#game_map.lines.append( [ $player.position * Game.grid_size + Game.grid_size / 2, pressedPos * Game.grid_size + Vector2( 0 , 1 ) * Game.grid_size ] )
+			#game_map.lines.append( [ $player.position * Game.grid_size + Game.grid_size / 2, pressedPos * Game.grid_size + Vector2( 1 , 1 ) * Game.grid_size ] )
+			game_map.lines.append( [ $player.position * Game.grid_size + Game.grid_size / 2, pressedPos * Game.grid_size + Game.grid_size / 2 ] )
+			#game_map.Calculate_FOV( $player.position, 5 )
 			game_map._CalculateTargetInFOV( $player.position, pressedPos )
 			game_map.update()
+			#game_map._checkWall( pressedPos )
 
 func _on_FPSTimer_timeout():
 	$HUD/FPSLabel.text = "FPS:" + str( int( Engine.get_frames_per_second() ) )
