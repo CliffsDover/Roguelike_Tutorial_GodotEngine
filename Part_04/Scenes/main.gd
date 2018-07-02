@@ -11,7 +11,7 @@ onready var gameMapScene = preload( "res://Scenes/GameMap.tscn" )
 var game_map
 
 func _ready():
-	#randomize()
+	randomize()
 	#$Player.rect_position = Vector2( screen_width / 2 * grid_width, screen_height / 2 * grid_height )
 	set_process_input( true )
 	
