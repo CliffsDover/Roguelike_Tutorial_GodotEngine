@@ -19,6 +19,7 @@ func _ready():
 	game_map.name = "game_map"
 	add_child( game_map )
 	
+	
 	var player = entityScene.instance()
 	player.name = "player"
 	player.Init( game_map.rooms[0].Center(), "主", Color( 1, 1, 1, 1 ) )
@@ -30,6 +31,8 @@ func _ready():
 	add_child( npc )
 	
 	entities= [ player, npc ]
+
+	game_map.Calculate_FOV( $player.position, 5 )
 	
 #func _process(delta):
 #	# Called every frame. Delta is time since last frame.
